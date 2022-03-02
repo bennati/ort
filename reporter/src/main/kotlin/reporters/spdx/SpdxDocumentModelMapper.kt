@@ -100,14 +100,15 @@ object SpdxDocumentModelMapper {
                 versionInfo = pkg.id.version
             )
 
-            val binaryPackageRelationship = SpdxRelationship(
-                spdxElementId = binaryPackage.spdxId,
-                relationshipType = SpdxRelationship.Type.DEPENDENCY_OF,
-                relatedSpdxElement = rootPackage.spdxId
-            )
+            ortResult.collectDependencies(pkg.id, 1).mapTo(relationships) { dependency ->
+                SpdxRelationship(
+                    spdxElementId = binaryPackage.spdxId,
+                    relationshipType = SpdxRelationship.Type.DEPENDS_ON,
+                    relatedSpdxElement = spdxPackageIdGenerator.nextId(dependency.name)
+                )
+            }
 
             packages += binaryPackage
-            relationships += binaryPackageRelationship
 
             if (pkg.vcsProcessed.url.isNotBlank()) {
                 val vcsScanResult =
